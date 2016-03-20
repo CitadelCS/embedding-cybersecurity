@@ -36,7 +36,7 @@ public class BankAccount {
     return String.format(fmt, this.getBalance());
   }
 ```
-The child class:
+Inside the child class, called SneakyAccount:
 ```java
   /*
    * This method overrides the inherited version and returns a false result. The inherited toString
