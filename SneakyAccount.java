@@ -6,12 +6,20 @@ public class SneakyAccount extends BankAccount {
     super(balance);
   }
 
-  public boolean withdraw(double amount) {
-    return true;
-  }
 
+  /*
+   * This method overrides the inherited version and returns a false result. The inherited toString
+   * method will invoke this version for all child class types.
+   */
   public double getBalance() {
     return 0;
+  }
+
+  /*
+   * This method allows us to see what getBalance should have returned had it not been overridden.
+   */
+  public double getSuperBalance() {
+    return super.getBalance();
   }
 
   public static void main(String[] args) {

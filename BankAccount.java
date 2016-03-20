@@ -7,6 +7,11 @@ public class BankAccount {
     this.balance = balance;
   }
 
+  /*
+   * This method does not validate the range of the parameter. It checks for sufficient funds, which
+   * is a good banking check, but it does not prevent negative amounts, which equate to a deposit
+   * not a withdrawal, and thus a potential exploit.
+   */
   public boolean withdraw(double amount) {
     if (amount > this.balance) return false;
     this.balance -= amount;
@@ -17,8 +22,14 @@ public class BankAccount {
     return this.balance;
   }
 
+
+  /*
+   * This public method references a public getter method, getBalance. Since this class does not
+   * prevent inheritance, this method could end up invoking an overridden version of getBalance and
+   * display inaccurate results.
+   */
   public String toString() {
-    String fmt = "Account Balance: $%,.2f\n";
+    String fmt = "Account Balance: $%,.2f";
     return String.format(fmt, this.getBalance());
   }
 
