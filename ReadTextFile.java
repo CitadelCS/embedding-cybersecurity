@@ -1,8 +1,6 @@
 package edu.citadel.cs.ecc.cs2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,10 +10,10 @@ public class ReadTextFile {
     System.out.print("Enter file name: ");
     Scanner input = new Scanner(System.in);
     String filename = input.nextLine();
-    ArrayList<Student> roster2 = readFileSecure(filename);
-    System.out.println(roster2);
-    ArrayList<Student> roster = readFile(filename);
-    System.out.println(roster);
+    ArrayList<Student> rosterA = readFileSecure(filename);
+    System.out.println(rosterA);
+    ArrayList<Student> rosterB = readFileInsecure(filename);
+    System.out.println(rosterB);
     input.close();
   }
 
@@ -33,7 +31,7 @@ public class ReadTextFile {
    * 
    * While the method is shorter, it is not worth the security risks imposed.
    */
-  private static ArrayList<Student> readFile(String filename) throws FileNotFoundException {
+  private static ArrayList<Student> readFileInsecure(String filename) throws FileNotFoundException {
     ArrayList<Student> roster = new ArrayList<Student>();
     Scanner fileScan = new Scanner(new File(filename));
     while (fileScan.hasNextLine()) {
@@ -55,8 +53,7 @@ public class ReadTextFile {
     try {
       fileScan = new Scanner(new File(filename));
     } catch (FileNotFoundException e) {
-      e.printStackTrace();
-      return null;
+      return roster;
     }
 
     while (fileScan != null && fileScan.hasNextLine()) {
