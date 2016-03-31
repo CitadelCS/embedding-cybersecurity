@@ -9,10 +9,13 @@ import java.util.Scanner;
 public class ReadTextFile {
 
   public static void main(String[] args) throws IOException {
-    System.out.println("Enter file name: ");
+    System.out.print("Enter file name: ");
     Scanner input = new Scanner(System.in);
     String filename = input.nextLine();
-    readFile(filename);
+    ArrayList<Student> roster2 = readFileSecure(filename);
+    System.out.println(roster2);
+    ArrayList<Student> roster = readFile(filename);
+    System.out.println(roster);
     input.close();
   }
 
@@ -59,15 +62,15 @@ public class ReadTextFile {
     while (fileScan != null && fileScan.hasNextLine()) {
       int age = 0;
       double gpa = 0;
-      String[] tokens = fileScan.nextLine().split(" \t");
+      String[] tokens = fileScan.nextLine().split("\\s+");
+      if (tokens.length != 2) continue;
       try {
         age = Integer.parseInt(tokens[0]);
         gpa = Double.parseDouble(tokens[1]);
       } catch (NumberFormatException e) {
-        continue; /////////////////////////////////// does this cut the loop or the catch
-      } finally { ////////////////////////////////////// is this right?
-        roster.add(new Student(age, gpa));
+        continue; // skip the rest of the loop
       }
+      roster.add(new Student(age, gpa));
     }
     fileScan.close();
     return roster;

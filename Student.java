@@ -8,4 +8,8 @@ public class Student {
     ID = i;
     gpa = g;
   }
+
+  public String toString() {
+    return String.format("<ID: %d, GPA: %.2f>", ID, gpa);
+  }
 }
