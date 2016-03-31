@@ -105,3 +105,48 @@ Account Balance: $0.00
 
 SneakyAccount's true balance: 10000.0
 ```
+
+## Example 3: Handling Exceptions
+In Java and in many other languages, runtime exceptions must either be thrown (or passed) to the calling function, or handled where the exception occurs. The latter is always the preferred solution, as the former assumes that the calling function will properly interpret and handle the exception generated. Consider the following toy example:
+```java
+import java.io.*;
+import java.util.Scanner;
+
+public class HandleExceptions {
+
+  public static void main(String[] args) {
+    // PART 1
+    try {
+      doSomethingDangerous();
+    } catch (Exception e) {
+      System.out.println("PART 1: Nothing to see here. Move along.");
+    }
+    // PART 2
+    try {
+      doSomethingLessDangerous();
+    } catch (Exception e) {
+      System.out.println("PART 2: Nothing to see here. Move along.");
+    }
+  }
+
+  public static void doSomethingDangerous() throws IOException {
+    Scanner fileScan = new Scanner(new File("this doesn't exist.txt"));
+    fileScan.close();
+  }
+
+  public static void doSomethingLessDangerous() {
+    try {
+      Scanner fileScan = new Scanner(new File("this doesn't exist.txt"));
+    } catch (FileNotFoundException e) {
+      System.out.println("Bad file name.");
+    }
+  }
+}
+```
+The first part of this example shows the main method intercepting a thrown exception from the `doSomethingDangerous` method, which attempts to open a non-existent file, generating a `FileNotFoundException`. But the main method is listening for any type of exception, and prints out a misleading result despite the critical error. Such techniques could be used to hide important error messages.
+
+The second part of the example is where the same exception is handled where it is generated, in the `doSomethingLessDangerous` method. Even with the same attempt to suppress in the main method, the error message is still reported to standard output because it is handled on the spot. Here is the output from running the program:
+```
+PART 1: Nothing to see here. Move along.
+Bad file name.
+```
