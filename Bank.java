@@ -51,9 +51,6 @@ public class Bank {
     bank.listAccountBalances();
 
     System.out.println("\nSneakyAccount's true balance: " + sa.getSuperBalance());
-
-
-
   }
 
   /*

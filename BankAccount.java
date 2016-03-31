@@ -22,7 +22,6 @@ public class BankAccount {
     return this.balance;
   }
 
-
   /*
    * This public method references a public getter method, getBalance. Since this class does not
    * prevent inheritance, this method could end up invoking an overridden version of getBalance and
