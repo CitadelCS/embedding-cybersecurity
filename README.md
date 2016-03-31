@@ -1,12 +1,8 @@
 # Embedding Cybersecurity Concepts - CS2
 
 ## Example 1: Validating Method Parameters
+This method does not validate the range of the parameter. It checks for sufficient funds, which is a good banking check, but it does not prevent negative amounts, which equate to a deposit not a withdrawal, and thus a potential exploit.
 ```java
-  /*
-   * This method does not validate the range of the parameter. It checks for sufficient funds, which
-   * is a good banking check, but it does not prevent negative amounts, which equate to a deposit
-   * not a withdrawal, and thus a potential exploit.
-   */
   public boolean withdraw(double amount) {
     if (amount > this.balance) return false;
     this.balance -= amount;
@@ -131,7 +127,6 @@ public class HandleExceptions {
 
   public static void doSomethingDangerous() throws IOException {
     Scanner fileScan = new Scanner(new File("this doesn't exist.txt"));
-    fileScan.close();
   }
 
   public static void doSomethingLessDangerous() {
