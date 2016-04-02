@@ -145,3 +145,110 @@ The second part of the example is where the same exception is handled where it i
 PART 1: Nothing to see here. Move along.
 Bad file name.
 ```
+It is important to make sure that critical errors are handled in the most appropriate way to the particular software being developed -- whether that happens to be with code written by others or in the code being created. In some cases, however, there is no better choice but to throw the handling of exceptions to the calling function.
+
+## Example 4: Validating File Input Data
+The code below demonstrates an insecure and a secure way to read data from a text file in an expected format. If expectations regarding the format and types of data are not checked, it becomes possible for malicious data to cause undesired behavior.
+
+This example reads in student data from a text file which is expected to have two data per line -- a student ID number followed by a GPA. A simple Student class was created to maintain the ID and GPA and to implement a `toString` method. The name of the file is specified by the user and then opened and processed by the program. The `readFileInsecure` method is too confident in the data being perfectly formed, and if anything goes wrong, the exceptions are thrown back to the main method (which does not handle them). The `readFileSecure` method is the better version of this method. It protects against an incorrect filename or missing file, and it verifies the format of each line of the file. If malformed data is found, the lines are skipped but processing continues instead of terminating abnormally.
+
+```java
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class ReadTextFile {
+
+  public static void main(String[] args) throws IOException {
+    System.out.print("Enter file name: ");
+    Scanner input = new Scanner(System.in);
+    String filename = input.nextLine();
+    System.out.print("Part 1:\t");
+    ArrayList<Student> rosterA = readFileSecure(filename);
+    System.out.println(rosterA);
+    System.out.print("\nPart 2:\t");
+    ArrayList<Student> rosterB = readFileInsecure(filename);
+    System.out.println(rosterB);
+    input.close();
+  }
+
+  /*
+   * This method is error prone. It first attempts to open a file named by the String parameter,
+   * which could have come from anywhere. In this example it is read in the main method from
+   * standard input and could be malformed or even malicious. In other contexts, this scenario can
+   * be used for query injection attacks. If anything is wrong when opening the file, a FileNotFound
+   * exception will be generated, but the method throws this exception to the calling method rather
+   * than handling it gracefully. This can lead to DoS attacks if the exception is repeatedly
+   * triggered. Next, this method presumes the integrity of the data in the file, which is assumed
+   * to have int-double pairs on each line representing student ID numbers and corresponding GPAs.
+   * If any non-numerical or malformed data is present in the file, a NumberFormatException will be
+   * triggered. This can lead to DoS or injection attacks.
+   * 
+   * While the method is shorter, it is not worth the security risks imposed.
+   */
+  private static ArrayList<Student> readFileInsecure(String filename) throws FileNotFoundException {
+    ArrayList<Student> roster = new ArrayList<Student>();
+    Scanner fileScan = new Scanner(new File(filename));
+    while (fileScan.hasNextLine()) {
+      roster.add(new Student(fileScan.nextInt(), fileScan.nextDouble()));
+    }
+    fileScan.close();
+    return roster;
+  }
+
+  /*
+   * This is the better version of the method above. First, the integrity of the filename is checked
+   * and the FileNotFound exception is handled directly rather than being thrown to the calling
+   * method. Next, the file data is read but inspected for malformed lines and improper data types.
+   * If these conditions are detected, the line is skipped and reading continues.
+   */
+  private static ArrayList<Student> readFileSecure(String filename) {
+    ArrayList<Student> roster = new ArrayList<Student>();
+    Scanner fileScan = null;
+    try {
+      fileScan = new Scanner(new File(filename));
+    } catch (FileNotFoundException e) {
+      return roster;
+    }
+
+    while (fileScan != null && fileScan.hasNextLine()) {
+      int age = 0;
+      double gpa = 0;
+      String[] tokens = fileScan.nextLine().split("\\s+");
+      if (tokens.length != 2) continue;
+      try {
+        age = Integer.parseInt(tokens[0]);
+        gpa = Double.parseDouble(tokens[1]);
+      } catch (NumberFormatException e) {
+        continue; // skip the rest of the loop
+      }
+      roster.add(new Student(age, gpa));
+    }
+    fileScan.close();
+    return roster;
+  }
+}
+```
+
+As a test run, the following textfile is provided to the program, which has errors on the 4th and 5th lines. The secure method skips them and reports the proper lines whereas the insecure method crashes with an error message. This kind of behavior can be exploited to creat DoS and/or injection attacks depending on the context.
+
+```
+123 4.00
+456 3.82
+789 2.49
+abc	def
+888 3.34 '-?
+```
+Output:
+```
+Enter file name: grades.txt
+Part 1:	[<ID: 123, GPA: 4.00>, <ID: 456, GPA: 3.82>, <ID: 789, GPA: 2.49>]
+
+Part 2:	Exception in thread "main" java.util.InputMismatchException
+	at java.util.Scanner.throwFor(Unknown Source)
+	at java.util.Scanner.next(Unknown Source)
+	at java.util.Scanner.nextInt(Unknown Source)
+	at java.util.Scanner.nextInt(Unknown Source)
+	at ReadTextFile.readFileInsecure(ReadTextFile.java:40)
+	at ReadTextFile.main(ReadTextFile.java:17)
+```
