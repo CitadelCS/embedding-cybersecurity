@@ -22,7 +22,6 @@ public class HandleExceptions {
 
   public static void doSomethingDangerous() throws IOException {
     Scanner fileScan = new Scanner(new File("this doesn't exist.txt"));
-    fileScan.close();
   }
 
   public static void doSomethingLessDangerous() {

@@ -10,8 +10,10 @@ public class ReadTextFile {
     System.out.print("Enter file name: ");
     Scanner input = new Scanner(System.in);
     String filename = input.nextLine();
+    System.out.print("Part 1:\t");
     ArrayList<Student> rosterA = readFileSecure(filename);
     System.out.println(rosterA);
+    System.out.print("\nPart 2:\t");
     ArrayList<Student> rosterB = readFileInsecure(filename);
     System.out.println(rosterB);
     input.close();
@@ -72,6 +74,4 @@ public class ReadTextFile {
     fileScan.close();
     return roster;
   }
-
-
 }
