@@ -252,3 +252,56 @@ Part 2:	Exception in thread "main" java.util.InputMismatchException
 	at ReadTextFile.readFileInsecure(ReadTextFile.java:40)
 	at ReadTextFile.main(ReadTextFile.java:17)
 ```
+## Example 5: Infinite and Inefficient Recursion
+Recursion is an elegant programming technique whereby a method or function calls itself as part of solving a problem. The key factor is to ensure that recursive calls are made with a smaller instance of the problem, and that a recursive function is properly designed by having a base case to end a sequence of recursive calls. If a base case is omitted or malformed, an infinite recursive call chain will be activated. While an infinite loop will often cause the program to hang while a loop counter races, inifinite recursion will often crash the program due to a memory error. This type of crash, rather than a program stuck in execution, can be exploited for malicious purposes.
+
+The reson that infinite recursion causes a memory error is because of the call stack used by the runtime environment. When a method is invoked, its local variables and information, and return address are stored in memory in a new activation frame and pushed onto the runtime stack. These frames are createded for every invocation, regardless if it is the same method being invoked many times or not. Infinite recursion will cause so many of these activation frames to be pushed onto the stack that it will eventually cause a stack overflow error due to insufficient memory.
+
+Consider the following example which prints out the digits of a number in reverse order to standard output. The algorithm is straight-forward, with the modulus operation printing the least-significant digit and the integer division recursively calling with the remaining significant digits. However, no base case is provided to stop the recursion, which will print zero forever once all the digits have been divided out by the integer division. The method body should be wrapped in an if-statement testing for values of n which are strictly greater than zero.
+
+```java
+  public static void reverseDisplay(int n) {
+    System.out.print(n % 10);
+    reverseDisplay(n / 10);
+  }
+```
+
+Infinite recursion is not the only exploitable scenario involving recursion. If a recursive solution is not applicable to all problem sizes, or if complex problem sizes are not detected, system resources can be wasted by an attacker by providing a valid but too-large problem size. A classic example of this is computing the nth Fibonacci number, which comes with a classic recurrence defnition which is easy to code as a recursive program, and is shown below:
+```java
+  /*
+   * This famous example's implementation was borrowed from
+   * http://introcs.cs.princeton.edu/java/23recursion/Fibonacci.java
+   */
+  public static long fibSlow(int n) {
+    if (n <= 1) return n;
+    else return fibSlow(n - 1) + fibSlow(n - 2);
+  }
+}
+```
+While this code runs fine for smaller problem sizes, it quickly gets stuck for moderately large problem sizes due to its wasteful complexity. Since it re-computes smaller subproblems, the runtime compounds with exponential complexity as the problem size increases. Situations like this are avoided by using loops instead of recursion, or by using tail-recursion, which passes along partial solutions to recursive calls so that the final recursive call can compile the final answer without backtracking through previous activation frames on the call stack. In fact, many compilers detect tail-recursion and optimize it so that it runs nearly as well as a loop. Here is the tail-recursive version of the nth Fibonacci calculation, which requires a wrapper method to begin, and passes in the current value, the previous value, and the number of numbers to go.
+```java
+  public static long fibFast(int n) {
+    if (n <= 1) return n;
+    return fibFastTR(1, 0, n);
+  }
+
+  private static long fibFastTR(long current, long previous, int n) {
+    if (n == 1) return current;
+    return fibFastTR(current + previous, current, n - 1);
+  }
+```
+While it is less compact, it is exponentially faster. Both implementations were asked to compute the 50th Fibonacci number and were clocked for time elapsed. The timing code and console output are shown below. The tail-recursive version took less than 1ms while the fully recursive version took nearly one minute.
+```java
+  public static void main(String[] args) {
+    long start = System.currentTimeMillis();
+    System.out.print(fibSlow(50));
+    System.out.printf(" -- fibSlow Time: %dms\n", (System.currentTimeMillis() - start));
+    start = System.currentTimeMillis();
+    System.out.print(fibFast(50));
+    System.out.printf(" -- fibFast Time: %dms\n", (System.currentTimeMillis() - start));
+  }
+```
+```
+12586269025 -- fibSlow Time: 50412ms
+12586269025 -- fibFast Time: 0ms
+```
