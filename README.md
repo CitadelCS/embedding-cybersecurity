@@ -82,10 +82,6 @@ public class Bank {
   }
 ```
 ```java
-public class Bank {
-  // This ArrayList will also hold subtypes of BankAccount
-  private ArrayList<BankAccount> accounts = new ArrayList<BankAccount>();
-
   /*
    * This example shows how a malicious child type can misrepresent object states if inheritance is
    * not prevented. Suppose a vulnerability exists in BankAccount which allows withdrawals of
