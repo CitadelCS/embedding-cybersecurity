@@ -22,53 +22,45 @@ public class BankAccount {
     return this.balance;
   }
 
+  public String toString() {
+    String fmt = "Account Balance: $%,.2f";
+    return String.format(fmt, this.getBalance());
+  }
+}
+```
+```java
   /*
    * This public method references a public getter method, getBalance. Since this class does not
    * prevent inheritance, this method could end up invoking an overridden version of getBalance and
    * display inaccurate results.
    */
-  public String toString() {
-    String fmt = "Account Balance: $%,.2f";
-    return String.format(fmt, this.getBalance());
-  }
 ```
 Inside the child class, called SneakyAccount:
+```java
+  public double getBalance() {
+    return 0;
+  }
+
+  public double getSuperBalance() {
+    return super.getBalance();
+  }
+```
 ```java
   /*
    * This method overrides the inherited version and returns a false result. The inherited toString
    * method will invoke this version for all child class types.
    */
-  public double getBalance() {
-    return 0;
-  }
 
   /*
    * This method allows us to see what getBalance should have returned had it not been overridden.
    */
-  public double getSuperBalance() {
-    return super.getBalance();
-  }
 ```
-
 An example client that assumes it is working only with BankAccount objects:
 ```java
 public class Bank {
   // This ArrayList will also hold subtypes of BankAccount
   private ArrayList<BankAccount> accounts = new ArrayList<BankAccount>();
 
-  /*
-   * This example shows how a malicious child type can misrepresent object states if inheritance is
-   * not prevented. Suppose a vulnerability exists in BankAccount which allows withdrawals of
-   * negative numbers, creating deposits. Wishing to avoid attention, the child type SneakyAccount
-   * is created and overrides the getBalance method to always report $0. The exploit is performed on
-   * a normal account and for the malicious type, and when the account reporting procedure is run,
-   * the balance change is noticed in the normal type but unnoticed in the child type.
-   * 
-   * If BankAccount is a final class, the inheritance is not possible. Alternatively, if the
-   * addAccount and listAccountBalances methods prevent child type objects and prevent polymorphism,
-   * the false reporting is not possible. Final classes preventing unwanted inheritance is the
-   * recommended fix.
-   */
   public static void main(String[] args) {
     BankAccount ba = new BankAccount(0);
     SneakyAccount sa = new SneakyAccount(0);
@@ -88,6 +80,25 @@ public class Bank {
 
     System.out.println("\nSneakyAccount's true balance: " + sa.getSuperBalance());
   }
+```
+```java
+public class Bank {
+  // This ArrayList will also hold subtypes of BankAccount
+  private ArrayList<BankAccount> accounts = new ArrayList<BankAccount>();
+
+  /*
+   * This example shows how a malicious child type can misrepresent object states if inheritance is
+   * not prevented. Suppose a vulnerability exists in BankAccount which allows withdrawals of
+   * negative numbers, creating deposits. Wishing to avoid attention, the child type SneakyAccount
+   * is created and overrides the getBalance method to always report $0. The exploit is performed on
+   * a normal account and for the malicious type, and when the account reporting procedure is run,
+   * the balance change is noticed in the normal type but unnoticed in the child type.
+   * 
+   * If BankAccount is a final class, the inheritance is not possible. Alternatively, if the
+   * addAccount and listAccountBalances methods prevent child type objects and prevent polymorphism,
+   * the false reporting is not possible. Final classes preventing unwanted inheritance is the
+   * recommended fix.
+   */
 ```
 Here is the output for running the code above:
 ```
@@ -172,20 +183,6 @@ public class ReadTextFile {
     input.close();
   }
 
-  /*
-   * This method is error prone. It first attempts to open a file named by the String parameter,
-   * which could have come from anywhere. In this example it is read in the main method from
-   * standard input and could be malformed or even malicious. In other contexts, this scenario can
-   * be used for query injection attacks. If anything is wrong when opening the file, a FileNotFound
-   * exception will be generated, but the method throws this exception to the calling method rather
-   * than handling it gracefully. This can lead to DoS attacks if the exception is repeatedly
-   * triggered. Next, this method presumes the integrity of the data in the file, which is assumed
-   * to have int-double pairs on each line representing student ID numbers and corresponding GPAs.
-   * If any non-numerical or malformed data is present in the file, a NumberFormatException will be
-   * triggered. This can lead to DoS or injection attacks.
-   * 
-   * While the method is shorter, it is not worth the security risks imposed.
-   */
   private static ArrayList<Student> readFileInsecure(String filename) throws FileNotFoundException {
     ArrayList<Student> roster = new ArrayList<Student>();
     Scanner fileScan = new Scanner(new File(filename));
@@ -196,12 +193,6 @@ public class ReadTextFile {
     return roster;
   }
 
-  /*
-   * This is the better version of the method above. First, the integrity of the filename is checked
-   * and the FileNotFound exception is handled directly rather than being thrown to the calling
-   * method. Next, the file data is read but inspected for malformed lines and improper data types.
-   * If these conditions are detected, the line is skipped and reading continues.
-   */
   private static ArrayList<Student> readFileSecure(String filename) {
     ArrayList<Student> roster = new ArrayList<Student>();
     Scanner fileScan = null;
@@ -229,7 +220,31 @@ public class ReadTextFile {
   }
 }
 ```
+```java
 
+  /*
+   * This method is error prone. It first attempts to open a file named by the String parameter,
+   * which could have come from anywhere. In this example it is read in the main method from
+   * standard input and could be malformed or even malicious. In other contexts, this scenario can
+   * be used for query injection attacks. If anything is wrong when opening the file, a FileNotFound
+   * exception will be generated, but the method throws this exception to the calling method rather
+   * than handling it gracefully. This can lead to DoS attacks if the exception is repeatedly
+   * triggered. Next, this method presumes the integrity of the data in the file, which is assumed
+   * to have int-double pairs on each line representing student ID numbers and corresponding GPAs.
+   * If any non-numerical or malformed data is present in the file, a NumberFormatException will be
+   * triggered. This can lead to DoS or injection attacks.
+   * 
+   * While the method is shorter, it is not worth the security risks imposed.
+   */
+   
+   
+  /*
+   * This is the better version of the method above. First, the integrity of the filename is checked
+   * and the FileNotFound exception is handled directly rather than being thrown to the calling
+   * method. Next, the file data is read but inspected for malformed lines and improper data types.
+   * If these conditions are detected, the line is skipped and reading continues.
+   */
+```
 As a test run, the following textfile is provided to the program, which has errors on the 4th and 5th lines. The secure method skips them and reports the proper lines whereas the insecure method crashes with an error message. This kind of behavior can be exploited to creat DoS and/or injection attacks depending on the context.
 
 ```
@@ -268,15 +283,17 @@ Consider the following example which prints out the digits of a number in revers
 
 Infinite recursion is not the only exploitable scenario involving recursion. If a recursive solution is not applicable to all problem sizes, or if complex problem sizes are not detected, system resources can be wasted by an attacker by providing a valid but too-large problem size. A classic example of this is computing the nth Fibonacci number, which comes with a classic recurrence defnition which is easy to code as a recursive program, and is shown below:
 ```java
-  /*
-   * This famous example's implementation was borrowed from
-   * http://introcs.cs.princeton.edu/java/23recursion/Fibonacci.java
-   */
   public static long fibSlow(int n) {
     if (n <= 1) return n;
     else return fibSlow(n - 1) + fibSlow(n - 2);
   }
 }
+```
+```java
+  /*
+   * This famous example's implementation was borrowed from
+   * http://introcs.cs.princeton.edu/java/23recursion/Fibonacci.java
+   */
 ```
 While this code runs fine for smaller problem sizes, it quickly gets stuck for moderately large problem sizes due to its wasteful complexity. Since it re-computes smaller subproblems, the runtime compounds with exponential complexity as the problem size increases. Situations like this are avoided by using loops instead of recursion, or by using tail-recursion, which passes along partial solutions to recursive calls so that the final recursive call can compile the final answer without backtracking through previous activation frames on the call stack. In fact, many compilers detect tail-recursion and optimize it so that it runs nearly as well as a loop. Here is the tail-recursive version of the nth Fibonacci calculation, which requires a wrapper method to begin, and passes in the current value, the previous value, and the number of numbers to go.
 ```java
