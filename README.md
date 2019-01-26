@@ -1,4 +1,6 @@
 # Embedding Cybersecurity Concepts - CS2
+These code examples are taken from our publication referenced below.
+Verdicchio, Michael, Deepti Joshi, and Shankar M. Banik. "Embedding cybersecurity in the second programming course (CS2)." Journal of Computing Sciences in Colleges 32.2 (2016): 165-171.
 
 ## Example 1: Validating Method Parameters
 This method does not validate the range of the parameter. It checks for sufficient funds, which is a good banking check, but it does not prevent negative amounts, which equate to a deposit not a withdrawal, and thus a potential exploit.
